@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mqtt-simulator-config
+  namespace: default
+data:
+  MQTT_BROKER: "tcp://192.168.212.13:1883"
+  MQTT_USERNAME: "rtu"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt-simulator-ups
+  namespace: default
+  labels:
+    app: mqtt-simulator-ups
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mqtt-simulator-ups
+  template:
+    metadata:
+      labels:
+        app: mqtt-simulator-ups
+    spec:
+      containers:
+      - name: simulator
+        image: mqtt-simulator-ups:latest # Change this to your actual registry/image
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MQTT_BROKER
+          valueFrom:
+            configMapKeyRef:
+              name: mqtt-simulator-config
+              key: MQTT_BROKER
+        - name: MQTT_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: mqtt-simulator-config
+              key: MQTT_USERNAME
+        - name: MQTT_PASSWORD
+          value: "grita123" # Recommended: Use a Kubernetes Secret instead
+        resources:
+          limits:
+            cpu: "200m"
+            memory: "128Mi"
+          requests:
+            cpu: "100m"
+            memory: "64Mi"

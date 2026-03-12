@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"sync"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -22,6 +23,7 @@ type Simulator struct {
 	client     mqtt.Client
 	rtuID      string
 	lastValues map[string]float64
+	mu         sync.RWMutex
 }
 
 func NewSimulator(broker string, rtuID string, username string, password string) (*Simulator, error) {
@@ -48,14 +50,15 @@ func NewSimulator(broker string, rtuID string, username string, password string)
 	}, nil
 }
 
-func (s *Simulator) publishTag(topic string, data TagValue) {
+func (s *Simulator) publishTag(topic string, data TagValue, wg *sync.WaitGroup) {
+	defer wg.Done()
 	payload, _ := json.Marshal(data)
 	token := s.client.Publish(topic, 0, false, payload)
 	token.Wait()
-	//fmt.Printf("[%s] Published to %s: %v\n", time.Now().Format(time.RFC3339), topic, data.Value)
 }
 
 func (s *Simulator) nextValue(tag string, unit string, base, variance float64, isCumulative bool) TagValue {
+	s.mu.Lock()
 	prev, ok := s.lastValues[tag]
 	if !ok {
 		prev = base
@@ -81,6 +84,7 @@ func (s *Simulator) nextValue(tag string, unit string, base, variance float64, i
 	}
 
 	s.lastValues[tag] = val
+	s.mu.Unlock()
 
 	return TagValue{
 		Timestamp: time.Now().Format("2006-01-02T15:04:05-0700"),
@@ -110,79 +114,87 @@ func main() {
 	}
 	fmt.Println("MQTT UPS Simulator connected successfully")
 
-	for {
-		prefix := "UPS_07_DUY"
+	type TagConfig struct {
+		name     string
+		category string
+		unit     string
+		base     float64
+		variance float64
+		cum      bool
+	}
 
-		tags := []struct {
-			name     string
-			category string
-			unit     string
-			base     float64
-			variance float64
-			cum      bool
-		}{
-			{"LOAD_VL3N", "LOAD", "V", 230, 2, false},
-			{"LOAD_VL12", "LOAD", "V", 400, 5, false},
-			{"LOAD_VL23", "LOAD", "V", 400, 5, false},
-			{"LOAD_VL31", "LOAD", "V", 400, 5, false},
-			{"LOAD_VL1N", "LOAD", "V", 230, 2, false},
-			{"LOAD_VL2N", "LOAD", "V", 230, 2, false},
-			{"LOAD_Freq", "LOAD", "Hz", 50, 0.1, false},
-			{"LOAD_IL1", "LOAD", "A", 10, 2, false},
-			{"LOAD_IL3", "LOAD", "A", 10, 2, false},
-			{"LOAD_IL2", "LOAD", "A", 10, 2, false},
-			{"LOAD_Ptot", "LOAD", "kW", 5, 1, false},
-			{"LOAD_pf", "LOAD", "", 0.98, 0.02, false},
-			{"LOAD_Qtot", "LOAD", "kVAR", 1, 0.5, false},
-			{"LOAD_Energy_Imp", "LOAD", "kWh", 26362, 0.1, true},
-			{"LOAD_Stot", "LOAD", "kVAR", 5, 1, false},
-			{"LOAD_Energy_Exp", "LOAD", "kWh", 0, 0, true},
+	tags := []TagConfig{
+		{"LOAD_VL3N", "LOAD", "V", 230, 2, false},
+		{"LOAD_VL12", "LOAD", "V", 400, 5, false},
+		{"LOAD_VL23", "LOAD", "V", 400, 5, false},
+		{"LOAD_VL31", "LOAD", "V", 400, 5, false},
+		{"LOAD_VL1N", "LOAD", "V", 230, 2, false},
+		{"LOAD_VL2N", "LOAD", "V", 230, 2, false},
+		{"LOAD_Freq", "LOAD", "Hz", 50, 0.1, false},
+		{"LOAD_IL1", "LOAD", "A", 10, 2, false},
+		{"LOAD_IL3", "LOAD", "A", 10, 2, false},
+		{"LOAD_IL2", "LOAD", "A", 10, 2, false},
+		{"LOAD_Ptot", "LOAD", "kW", 5, 1, false},
+		{"LOAD_pf", "LOAD", "", 0.98, 0.02, false},
+		{"LOAD_Qtot", "LOAD", "kVAR", 1, 0.5, false},
+		{"LOAD_Energy_Imp", "LOAD", "kWh", 26362, 0.1, true},
+		{"LOAD_Stot", "LOAD", "kVAR", 5, 1, false},
+		{"LOAD_Energy_Exp", "LOAD", "kWh", 0, 0, true},
 
-			{"INC1_VL12", "INC", "V", 400, 5, false},
-			{"INC1_VL23", "INC", "V", 400, 5, false},
-			{"INC1_VL31", "INC", "V", 400, 5, false},
-			{"INC1_VL1N", "INC", "V", 230, 2, false},
-			{"INC1_VL2N", "INC", "V", 230, 2, false},
-			{"INC1_VL3N", "INC", "V", 230, 2, false},
-			{"INC1_IL1", "INC", "A", 50, 5, false},
-			{"INC1_IL2", "INC", "A", 50, 5, false},
-			{"INC1_IL3", "INC", "A", 50, 5, false},
-			{"INC1_Freq", "INC", "Hz", 50, 0.1, false},
-			{"INC1_pf", "INC", "", 0.95, 0.05, false},
-			{"INC1_Ptot", "INC", "kW", 30, 5, false},
-			{"INC1_Qtot", "INC", "kVAR", 5, 2, false},
-			{"INC1_Stot", "INC", "kVAR", 30, 5, false},
-			{"INC1_Energy_Exp", "INC", "kWh", 0, 0, true},
-			{"INC1_Energy_Imp", "INC", "kWh", 15000, 0.5, true},
+		{"INC1_VL12", "INC", "V", 400, 5, false},
+		{"INC1_VL23", "INC", "V", 400, 5, false},
+		{"INC1_VL31", "INC", "V", 400, 5, false},
+		{"INC1_VL1N", "INC", "V", 230, 2, false},
+		{"INC1_VL2N", "INC", "V", 230, 2, false},
+		{"INC1_VL3N", "INC", "V", 230, 2, false},
+		{"INC1_IL1", "INC", "A", 50, 5, false},
+		{"INC1_IL2", "INC", "A", 50, 5, false},
+		{"INC1_IL3", "INC", "A", 50, 5, false},
+		{"INC1_Freq", "INC", "Hz", 50, 0.1, false},
+		{"INC1_pf", "INC", "", 0.95, 0.05, false},
+		{"INC1_Ptot", "INC", "kW", 30, 5, false},
+		{"INC1_Qtot", "INC", "kVAR", 5, 2, false},
+		{"INC1_Stot", "INC", "kVAR", 30, 5, false},
+		{"INC1_Energy_Exp", "INC", "kWh", 0, 0, true},
+		{"INC1_Energy_Imp", "INC", "kWh", 15000, 0.5, true},
 
-			{"UPS_V1_Inc", "UPS", "V", 230, 2, false},
-			{"UPS_V2_Inc", "UPS", "V", 230, 2, false},
-			{"UPS_IL1_Inc", "UPS", "A", 11, 1, false},
-			{"UPS_IL3_Inc", "UPS", "A", 12, 1, false},
-			{"UPS_V2_Out", "UPS", "V", 400, 2, false},
-			{"UPS_IL2_Inc", "UPS", "A", 13, 1, false},
-			{"UPS_V3_Inc", "UPS", "V", 230, 2, false},
-			{"UPS_V1_Out", "UPS", "V", 400, 2, false},
-			{"UPS_P_Load1", "UPS", "%", 45, 5, false},
-			{"UPS_V3_Out", "UPS", "V", 400, 2, false},
-			{"UPS_P_Load2", "UPS", "%", 42, 5, false},
-			{"UPS_P_Load3", "UPS", "%", 44, 5, false},
-			{"UPS_P_LoadTotal", "UPS", "%", 44, 2, false},
-			{"UPS_F", "UPS", "Hz", 50, 0.1, false},
-			{"UPS_P", "UPS", "kW", 15, 2, false},
-			{"UPS_IL3_Out", "UPS", "A", 20, 2, false},
-			{"UPS_IL2_Out", "UPS", "A", 21, 2, false},
-			{"UPS_IL1_Out", "UPS", "A", 22, 2, false},
-			{"UPS_Temp", "UPS", "degC", 35, 2, false},
-			{"UPS_SOC_Battery", "UPS", "%", 100, 0, false},
-			{"UPS_V_Battery", "UPS", "V", 650, 5, false},
-		}
+		{"UPS_V1_Inc", "UPS", "V", 230, 2, false},
+		{"UPS_V2_Inc", "UPS", "V", 230, 2, false},
+		{"UPS_IL1_Inc", "UPS", "A", 11, 1, false},
+		{"UPS_IL3_Inc", "UPS", "A", 12, 1, false},
+		{"UPS_V2_Out", "UPS", "V", 400, 2, false},
+		{"UPS_IL2_Inc", "UPS", "A", 13, 1, false},
+		{"UPS_V3_Inc", "UPS", "V", 230, 2, false},
+		{"UPS_V1_Out", "UPS", "V", 400, 2, false},
+		{"UPS_P_Load1", "UPS", "%", 45, 5, false},
+		{"UPS_V3_Out", "UPS", "V", 400, 2, false},
+		{"UPS_P_Load2", "UPS", "%", 42, 5, false},
+		{"UPS_P_Load3", "UPS", "%", 44, 5, false},
+		{"UPS_P_LoadTotal", "UPS", "%", 44, 2, false},
+		{"UPS_F", "UPS", "Hz", 50, 0.1, false},
+		{"UPS_P", "UPS", "kW", 15, 2, false},
+		{"UPS_IL3_Out", "UPS", "A", 20, 2, false},
+		{"UPS_IL2_Out", "UPS", "A", 21, 2, false},
+		{"UPS_IL1_Out", "UPS", "A", 22, 2, false},
+		{"UPS_Temp", "UPS", "degC", 35, 2, false},
+		{"UPS_SOC_Battery", "UPS", "%", 100, 0, false},
+		{"UPS_V_Battery", "UPS", "V", 650, 5, false},
+	}
 
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	prefix := "UPS_07_DUY"
+
+	for range ticker.C {
+		var wg sync.WaitGroup
 		for _, t := range tags {
 			val := sim.nextValue(t.name, t.unit, t.base, t.variance, t.cum)
-			sim.publishTag(fmt.Sprintf("%s/%s/%s", prefix, t.category, t.name), val)
+			topic := fmt.Sprintf("%s/%s/%s", prefix, t.category, t.name)
+			wg.Add(1)
+			go sim.publishTag(topic, val, &wg)
 		}
-
-		time.Sleep(1 * time.Second)
+		wg.Wait()
+		fmt.Printf("[%s] Pulse completed: %d tags published\n", time.Now().Format(time.RFC3339), len(tags))
 	}
 }

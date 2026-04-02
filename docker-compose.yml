@@ -6,6 +6,8 @@ services:
     container_name: mqtt-simulator-ups
     env_file:
       - .env
+    environment:
+      - TZ=Asia/Jakarta
     restart: unless-stopped
     logging:
       driver: "json-file"

@@ -87,10 +87,21 @@ func (s *Simulator) nextValue(tag string, unit string, base, variance float64, i
 	s.mu.Unlock()
 
 	return TagValue{
-		Timestamp: time.Now().Format("2006-01-02T15:04:05-0700"),
+		Timestamp: time.Now().In(jakartaLoc).Format("2006-01-02T15:04:05-0700"),
 		Type:      "MeasureValue",
 		Unit:      unit,
 		Value:     val,
+	}
+}
+
+var jakartaLoc *time.Location
+
+func init() {
+	var err error
+	jakartaLoc, err = time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		// fallback ke UTC+7 manual jika tzdata tidak tersedia
+		jakartaLoc = time.FixedZone("WIB", 7*60*60)
 	}
 }
 
@@ -195,6 +206,6 @@ func main() {
 			go sim.publishTag(topic, val, &wg)
 		}
 		wg.Wait()
-		fmt.Printf("[%s] Pulse completed: %d tags published\n", time.Now().Format(time.RFC3339), len(tags))
+		fmt.Printf("[%s] Pulse completed: %d tags published\n", time.Now().In(jakartaLoc).Format(time.RFC3339), len(tags))
 	}
 }

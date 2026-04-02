@@ -16,7 +16,9 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o simulator main.go
 # Run stage
 FROM alpine:latest
 
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates tzdata
+
+ENV TZ=Asia/Jakarta
 
 WORKDIR /root/
 

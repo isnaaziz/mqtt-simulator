@@ -6,6 +6,8 @@ services:
     container_name: mqtt-simulator-ups
     env_file:
       - .env
+    ports:
+      - "4409:4409"
     environment:
       - TZ=Asia/Jakarta
     restart: unless-stopped

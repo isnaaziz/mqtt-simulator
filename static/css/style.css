@@ -78,7 +78,9 @@ header {
   padding: 9px 13px; border-radius: 8px; cursor: pointer;
   background: var(--panel); color: var(--text); border: 1px solid var(--line); transition: .15s;
 }
-.btn:hover { border-color: var(--danger); color: var(--danger); }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn-auto:hover { border-color: var(--auto); color: var(--auto); }
+.btn-manual:hover { border-color: var(--manual); color: var(--manual); }
 
 main { padding: 22px 24px 60px; max-width: 1500px; margin: 0 auto; }
 

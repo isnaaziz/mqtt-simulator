@@ -41,7 +41,8 @@ function onUpdate(msg) {
   update3D({ tags, breakers, energize: computeEnergize() });
 }
 
-$("resetAll").onclick = () => send({ action: "reset_all" });
+$("autoAll").onclick = () => send({ action: "auto_all" });
+$("manualAll").onclick = () => send({ action: "manual_all" });
 
 initUI(
   (name) => openDrawer(name),

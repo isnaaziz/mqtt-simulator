@@ -75,22 +75,24 @@ func New(broker, rtuID, prefix, username, password string, tags []model.TagState
 	if password != "" {
 		opts.SetPassword(password)
 	}
+	opts.SetDefaultPublishHandler(func(_ mqtt.Client, msg mqtt.Message) {
+		if msg.Topic() != cmdTopic {
+			return
+		}
+		log.Printf("MQTT CMD raw: topic=%s payload=%s", msg.Topic(), string(msg.Payload()))
+		var ctrl model.ControlMsg
+		if err := json.Unmarshal(msg.Payload(), &ctrl); err != nil {
+			log.Printf("MQTT CMD parse error: %v", err)
+			return
+		}
+		log.Printf("MQTT CMD: action=%s tag=%s state=%s", ctrl.Action, ctrl.Tag, ctrl.State)
+		s.HandleControl(ctrl)
+	})
 	opts.SetOnConnectHandler(func(c mqtt.Client) {
 		s.connected.Store(true)
 		log.Println("MQTT broker connected")
-		token := c.Subscribe(cmdTopic, 1, func(_ mqtt.Client, msg mqtt.Message) {
-			log.Printf("MQTT CMD raw: topic=%s payload=%s", msg.Topic(), string(msg.Payload()))
-			var ctrl model.ControlMsg
-			if err := json.Unmarshal(msg.Payload(), &ctrl); err != nil {
-				log.Printf("MQTT CMD parse error: %v — payload: %s", err, string(msg.Payload()))
-				return
-			}
-			log.Printf("MQTT CMD: action=%s tag=%s state=%s", ctrl.Action, ctrl.Tag, ctrl.State)
-			s.HandleControl(ctrl)
-		})
-		token.Wait()
-		if err := token.Error(); err != nil {
-			log.Printf("MQTT subscribe GAGAL %s: %v", cmdTopic, err)
+		if token := c.Subscribe(cmdTopic, 1, nil); token.Wait() && token.Error() != nil {
+			log.Printf("MQTT subscribe GAGAL %s: %v", cmdTopic, token.Error())
 		} else {
 			log.Printf("MQTT subscribe OK: %s (QoS 1)", cmdTopic)
 		}
@@ -134,19 +136,36 @@ func (s *Simulator) HandleControl(msg model.ControlMsg) {
 	changedCB := s.applyControl(msg)
 	s.mu.Unlock()
 
-	if changedCB != "" && s.connected.Load() {
-		s.publishCBState(changedCB)
+	if s.connected.Load() {
+		if changedCB != "" {
+			s.publishCBState(changedCB)
+		} else if msg.Action == "set_value" || msg.Action == "set_mode" {
+			s.publishTagState(msg.Tag)
+		} else if msg.Action == "manual_all" || msg.Action == "auto_all" || msg.Action == "reset_all" {
+			for _, name := range s.order {
+				s.publishTagState(name)
+			}
+		}
 	}
 
 	s.hub.Send(s.Snapshot())
 }
 
 func (s *Simulator) applyControl(msg model.ControlMsg) (changedCB string) {
-	if msg.Action == "reset_all" {
+	if msg.Action == "reset_all" || msg.Action == "auto_all" {
 		for _, t := range s.tags {
 			t.Mode = "auto"
 		}
 		log.Println("control: reset all tags to AUTO")
+		return ""
+	}
+
+	if msg.Action == "manual_all" {
+		for _, t := range s.tags {
+			t.Mode = "manual"
+			t.Manual = t.Value
+		}
+		log.Println("control: set all tags to MANUAL")
 		return ""
 	}
 
@@ -161,8 +180,17 @@ func (s *Simulator) applyControl(msg model.ControlMsg) (changedCB string) {
 			} else {
 				b.State = "closed"
 			}
-		} else if msg.State == "open" || msg.State == "closed" {
-			b.State = msg.State
+		} else {
+			st := msg.State
+			switch st {
+			case "close":
+				st = "closed"
+			case "opened":
+				st = "open"
+			}
+			if st == "open" || st == "closed" {
+				b.State = st
+			}
 		}
 		log.Printf("control: CB %s -> %s\n", b.Name, b.State)
 		return b.Name
@@ -215,6 +243,26 @@ func (s *Simulator) publishCBState(name string) {
 	s.client.Publish(topic, 0, true, payload)
 }
 
+func (s *Simulator) publishTagState(name string) {
+	s.mu.RLock()
+	t, ok := s.tags[name]
+	if !ok {
+		s.mu.RUnlock()
+		return
+	}
+	tv := model.TagValue{
+		Timestamp: time.Now().In(timeutil.JakartaLoc).Format("2006-01-02T15:04:05-0700"),
+		Type:      "MeasureValue",
+		Unit:      t.Unit,
+		Value:     t.Value,
+	}
+	topic := fmt.Sprintf("%s/%s/%s", s.prefix, t.Category, t.Name)
+	payload, _ := json.Marshal(tv)
+	s.mu.RUnlock()
+
+	s.client.Publish(topic, 0, false, payload)
+}
+
 func (s *Simulator) Snapshot() []byte {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -248,15 +296,15 @@ func (s *Simulator) Tick() {
 		} else {
 			t.Value = computeAuto(t)
 		}
-		tv := model.TagValue{
-			Timestamp: time.Now().In(timeutil.JakartaLoc).Format("2006-01-02T15:04:05-0700"),
-			Type:      "MeasureValue",
-			Unit:      t.Unit,
-			Value:     t.Value,
-		}
-		topic := fmt.Sprintf("%s/%s/%s", s.prefix, t.Category, t.Name)
-		payload, _ := json.Marshal(tv)
-		if s.connected.Load() {
+		if t.Mode == "auto" && s.connected.Load() {
+			tv := model.TagValue{
+				Timestamp: time.Now().In(timeutil.JakartaLoc).Format("2006-01-02T15:04:05-0700"),
+				Type:      "MeasureValue",
+				Unit:      t.Unit,
+				Value:     t.Value,
+			}
+			topic := fmt.Sprintf("%s/%s/%s", s.prefix, t.Category, t.Name)
+			payload, _ := json.Marshal(tv)
 			wg.Add(1)
 			go func(topic string, payload []byte) {
 				defer wg.Done()
@@ -267,26 +315,7 @@ func (s *Simulator) Tick() {
 	s.mu.Unlock()
 	wg.Wait()
 
-	if s.connected.Load() {
-		s.mu.RLock()
-		for _, name := range s.breakerOrder {
-			b := s.breakers[name]
-			v := 0
-			if b.State == "closed" {
-				v = 1
-			}
-			sv := model.StatusValue{
-				Timestamp: time.Now().In(timeutil.JakartaLoc).Format("2006-01-02T15:04:05-0700"),
-				Type:      "SinglePoint",
-				Value:     v,
-				Status:    b.State,
-			}
-			topic := fmt.Sprintf("%s/%s/%s", s.prefix, b.Category, b.Name)
-			payload, _ := json.Marshal(sv)
-			s.client.Publish(topic, 0, true, payload)
-		}
-		s.mu.RUnlock()
-	}
+
 
 	s.hub.Send(s.Snapshot())
 }

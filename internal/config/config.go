@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strings"
 
 	"mqtt_simulator_ups/internal/model"
 )
@@ -23,6 +24,9 @@ func Load() AppConfig {
 	httpAddr := ":8080"
 	if a := os.Getenv("HTTP_ADDR"); a != "" {
 		httpAddr = a
+		if !strings.HasPrefix(httpAddr, ":") && !strings.Contains(httpAddr, ":") {
+			httpAddr = ":" + httpAddr
+		}
 	}
 	return AppConfig{
 		Broker:   broker,

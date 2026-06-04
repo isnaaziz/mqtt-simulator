@@ -21,7 +21,7 @@ export function buildGrid(list) {
     if (!(t.category in idx)) { idx[t.category] = groups.length; groups.push({ cat: t.category, items: [] }); }
     groups[idx[t.category]].items.push(t);
   }
-  const palette = { LOAD: "#2563eb", INC: "#7c3aed", UPS: "#0d9488" };
+  const palette = { LOAD: "#3b82f6", INC: "#8b5cf6", UPS: "#06b6d4" };
   for (const g of groups) {
     const sec = document.createElement("section");
     sec.className = "group";

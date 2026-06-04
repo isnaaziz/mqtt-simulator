@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UPS HMI · 3D One-Line Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12z" />
+        </svg>
+      </div>
+      <div>
+        <h1 id="rtuName">UPS HMI · ONE-LINE</h1>
+        <div class="sub" id="prefix">— · —</div>
+      </div>
+    </div>
+    <div class="meta">
+      <div class="stat">
+        <div class="k">Manual Tags</div>
+        <div class="v amber" id="manCount">0</div>
+      </div>
+      <div class="stat">
+        <div class="k">Last Pulse</div>
+        <div class="v" id="ts">--:--:--</div>
+      </div>
+      <div class="conn off" id="broker"><span class="dot"></span><span id="brokerTxt">Broker —</span></div>
+      <div class="conn off" id="conn"><span class="dot"></span><span id="connTxt">HMI Offline</span></div>
+      <button class="btn" id="resetAll">Reset All → Auto</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="sec-title">
+      <span class="bar" style="background:var(--auto)"></span>
+      <h2>3D One-Line Mimic</h2>
+      <span class="count">klik breaker untuk open/close</span>
+    </div>
+    <div class="scene-wrap">
+      <div id="scene3d">
+        <div class="scene-fallback" id="sceneFallback">
+          Memuat scene 3D…<br />
+          <span style="font-size:11px">(butuh koneksi internet untuk three.js dari CDN)</span>
+        </div>
+      </div>
+      <div class="hint3d">Drag = putar · Scroll = zoom · Klik CB = toggle</div>
+      <div class="legend">
+        <span><i style="background:#16a34a"></i>Energized</span>
+        <span><i style="background:#cbd5e1"></i>De-energized</span>
+        <span><i style="background:#16a34a"></i>CB Closed</span>
+        <span><i style="background:#dc2626"></i>CB Open</span>
+      </div>
+    </div>
+
+    <div class="sec-title">
+      <span class="bar" style="background:var(--danger)"></span>
+      <h2>Circuit Breakers · Tele-Control</h2>
+      <span class="count" id="cbCount">0</span>
+    </div>
+    <div class="cb-grid" id="cbPanel"></div>
+
+    <div class="sec-title">
+      <span class="bar"></span>
+      <h2>Analog Measurements</h2>
+      <span class="count" id="tagCount">0</span>
+    </div>
+    <div id="board">
+      <div style="text-align:center;padding:40px 0;color:var(--muted);font-family:var(--mono)">Menyambung ke simulator…</div>
+    </div>
+  </main>
+
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer">
+    <div class="d-head">
+      <div class="d-cat" id="dCat">—</div>
+      <div class="d-name" id="dName">—</div>
+      <button class="d-close" id="dClose">×</button>
+    </div>
+    <div class="d-body">
+      <div class="live">
+        <div class="lab">Nilai Live (dipublish)</div>
+        <div class="num" id="dLive">—</div>
+        <div class="u" id="dUnit"></div>
+      </div>
+      <p class="field-lab">Mode Kontrol</p>
+      <div class="mode-toggle">
+        <button id="btnAuto">Auto</button>
+        <button id="btnManual">Manual</button>
+      </div>
+      <div class="ctl" id="ctl">
+        <p class="field-lab">Setpoint Manual</p>
+        <div class="input-row">
+          <button class="step" id="stepDown">−</button>
+          <input type="number" id="setpoint" step="any" />
+          <button class="step" id="stepUp">+</button>
+        </div>
+        <input type="range" id="slider" />
+        <div class="range-meta"><span id="rMin">0</span><span id="rMax">100</span></div>
+        <button class="apply" id="apply">Terapkan Setpoint</button>
+        <p class="hint">Nilai dipublish ke MQTT tiap detik selama mode Manual aktif.</p>
+      </div>
+    </div>
+  </aside>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

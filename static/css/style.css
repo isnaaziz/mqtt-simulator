@@ -1,8 +1,8 @@
 :root {
   /* Color system */
-  --bg: #F8FAFC;
+  --bg: #F4F7FB;
   --surface: #FFFFFF;
-  --surface-secondary: #F8FAFC;
+  --surface-secondary: #F4F7FB;
   --border: #E2E8F0;
   --border-strong: #CBD5E1;
 
@@ -12,21 +12,21 @@
   --text-tertiary: #94A3B8;
 
   /* Semantic status */
-  --accent: #2563EB;
-  --accent-dim: rgba(37, 99, 235, 0.07);
-  --success: #10B981;
-  --success-dim: rgba(16, 185, 129, 0.08);
-  --warning: #F59E0B;
-  --warning-dim: rgba(245, 158, 11, 0.08);
-  --danger: #EF4444;
-  --danger-dim: rgba(239, 68, 68, 0.07);
+  --accent: #2E5BFF;
+  --accent-dim: rgba(46, 91, 255, 0.08);
+  --success: #2E5BFF;
+  --success-dim: rgba(46, 91, 255, 0.08);
+  --warning: #8B5CF6;
+  --warning-dim: rgba(139, 92, 246, 0.08);
+  --danger: #94A3B8;
+  --danger-dim: rgba(148, 163, 184, 0.10);
 
   /* Legacy aliases (used by inline HTML and JS-generated markup) */
-  --ok: #10B981;
+  --ok: #2E5BFF;
   --muted: #64748B;
   --dim: #94A3B8;
-  --closed: #10B981;
-  --open: #EF4444;
+  --closed: #2E5BFF;
+  --open: #94A3B8;
   --mono: 'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
   --disp: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
 
@@ -160,12 +160,12 @@ header {
 .conn.off .dot { background: var(--danger); }
 .conn.on {
   color: var(--success);
-  border-color: rgba(16, 185, 129, 0.25);
+  border-color: rgba(46, 91, 255, 0.25);
   background: var(--success-dim);
 }
 .conn.off {
   color: var(--danger);
-  border-color: rgba(239, 68, 68, 0.2);
+  border-color: rgba(148, 163, 184, 0.2);
   background: var(--danger-dim);
 }
 
@@ -195,12 +195,12 @@ header {
   background: var(--surface-secondary);
 }
 .btn-auto:hover {
-  border-color: rgba(16, 185, 129, 0.4);
+  border-color: rgba(46, 91, 255, 0.4);
   color: var(--success);
   background: var(--success-dim);
 }
 .btn-manual:hover {
-  border-color: rgba(245, 158, 11, 0.4);
+  border-color: rgba(139, 92, 246, 0.4);
   color: var(--warning);
   background: var(--warning-dim);
 }
@@ -508,13 +508,13 @@ main > div, main > section { margin-bottom: 28px; }
 .cb-card.closed .cb-state {
   color: var(--success);
   background: var(--success-dim);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(46, 91, 255, 0.2);
 }
 .cb-card.closed .cb-state i { background: var(--success); }
 .cb-card.open .cb-state {
   color: var(--danger);
   background: var(--danger-dim);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(148, 163, 184, 0.2);
 }
 .cb-card.open .cb-state i { background: var(--danger); }
 
@@ -591,8 +591,8 @@ main > div, main > section { margin-bottom: 28px; }
   border-color: var(--border-strong);
 }
 .card.manual {
-  border-color: rgba(245, 158, 11, 0.28);
-  background: rgba(245, 158, 11, 0.02);
+  border-color: rgba(139, 92, 246, 0.28);
+  background: rgba(139, 92, 246, 0.02);
 }
 
 .card-left { flex: 1; min-width: 0; }
@@ -660,7 +660,7 @@ main > div, main > section { margin-bottom: 28px; }
 .card.manual .badge {
   color: var(--warning);
   background: var(--warning-dim);
-  border-color: rgba(245, 158, 11, 0.18);
+  border-color: rgba(139, 92, 246, 0.18);
 }
 .val.flash { color: var(--accent); }
 
@@ -801,13 +801,13 @@ main > div, main > section { margin-bottom: 28px; }
 }
 .mode-toggle button.on-auto {
   background: var(--success-dim);
-  border-color: rgba(16, 185, 129, 0.28);
+  border-color: rgba(46, 91, 255, 0.28);
   color: var(--success);
   font-weight: 600;
 }
 .mode-toggle button.on-manual {
   background: var(--warning-dim);
-  border-color: rgba(245, 158, 11, 0.28);
+  border-color: rgba(139, 92, 246, 0.28);
   color: var(--warning);
   font-weight: 600;
 }
@@ -833,7 +833,7 @@ main > div, main > section { margin-bottom: 28px; }
 .input-row input:focus {
   outline: none;
   border-color: var(--warning);
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
 }
 .step {
   width: 42px;
@@ -874,11 +874,11 @@ input[type=range] { width: 100%; accent-color: var(--warning); margin: 6px 0 8px
   color: #fff;
   border: none;
   transition: all 0.15s;
-  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.25);
+  box-shadow: 0 1px 3px rgba(139, 92, 246, 0.25);
 }
 .apply:hover {
-  background: #E8920A;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  background: #7C3AED;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
 .hint {

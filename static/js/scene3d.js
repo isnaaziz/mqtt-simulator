@@ -27,7 +27,7 @@ function _setup(mount, fallback, onCBClick) {
 
   const scene = new THREE.Scene();
   // No scene.background → canvas stays transparent, glass CSS shows through
-  scene.fog = new THREE.FogExp2(0xddeaf8, 0.022);
+  scene.fog = new THREE.FogExp2(0xF8FAFC, 0.015);
 
   const camera = new THREE.PerspectiveCamera(46, W() / H(), 0.1, 200);
   camera.position.set(9, 8.5, 17);
@@ -38,11 +38,10 @@ function _setup(mount, fallback, onCBClick) {
     powerPreference: "high-performance",
   });
   renderer.setSize(W(), H());
-  // Cap at 1.5 — Retina at 2× renders 4× the pixels for little visible gain
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   renderer.setClearColor(0x000000, 0);
-  // Shadows disabled — saves a full shadow-map pass every frame
-  renderer.shadowMap.enabled = false;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   mount.appendChild(renderer.domElement);
   if (fallback) fallback.style.display = "none";
 
@@ -61,54 +60,86 @@ function _setup(mount, fallback, onCBClick) {
   controls.rotateSpeed = 0.65;
   controls.zoomSpeed = 0.8;
 
-  // Lighting to match blue-lavender glass background
-  const hemi = new THREE.HemisphereLight(0xddeeff, 0xb8cce8, 1.4);
-  scene.add(hemi);
+  // Studio-quality 3-point lighting for a premium industrial render
+  const ambient = new THREE.AmbientLight(0xF0F4FF, 0.55);
+  scene.add(ambient);
 
-  const sun = new THREE.DirectionalLight(0xffffff, 1.6);
-  sun.position.set(10, 22, 14);
+  const sun = new THREE.DirectionalLight(0xFFFCF5, 2.2);
+  sun.position.set(14, 24, 12);
+  sun.castShadow = true;
+  sun.shadow.mapSize.width = 1024;
+  sun.shadow.mapSize.height = 1024;
+  sun.shadow.camera.near = 1;
+  sun.shadow.camera.far = 60;
+  sun.shadow.camera.left = -22;
+  sun.shadow.camera.right = 22;
+  sun.shadow.camera.top = 20;
+  sun.shadow.camera.bottom = -20;
+  sun.shadow.bias = -0.0015;
+  sun.shadow.normalBias = 0.02;
   scene.add(sun);
 
-  const fill = new THREE.DirectionalLight(0xc8d8f8, 0.6);
-  fill.position.set(-12, 10, -8);
+  const fill = new THREE.DirectionalLight(0xC5D8F5, 0.9);
+  fill.position.set(-14, 10, -10);
   scene.add(fill);
 
-  // Floor: soft blue-lavender to blend with background
+  const rim = new THREE.DirectionalLight(0xE8F0FF, 0.4);
+  rim.position.set(0, 2, -18);
+  scene.add(rim);
+
+  // Polished concrete floor — premium industrial look
   const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(80, 60, 1, 1),
     new THREE.MeshStandardMaterial({
-      color: 0xdce8f5,
-      roughness: 0.92,
-      metalness: 0.0,
+      color: 0xF1F5F9,
+      roughness: 0.55,
+      metalness: 0.05,
       transparent: true,
-      opacity: 0.72,
+      opacity: 0.90,
     })
   );
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -0.01;
+  floor.receiveShadow = true;
   scene.add(floor);
 
-  // Subtle grid that matches glass palette
-  const grid = new THREE.GridHelper(60, 50, 0xbacce8, 0xcddaf0);
-  grid.position.y = 0.001;
+  const grid = new THREE.GridHelper(60, 40, 0xBDCAD9, 0xDDE4EE);
+  grid.position.y = 0.002;
   grid.material.transparent = true;
-  grid.material.opacity = 0.45;
+  grid.material.opacity = 0.55;
   scene.add(grid);
 
   const Y_BUS = 3.2;
   const Y_BYP = 4.7;
   const NODE = { GRID: -11, INC: -5.5, UPS: 0, LOAD: 6.5 };
   const COL = {
-    busOn: 0x16a34a, busOff: 0xb0bfcf, gray: 0xa8b4c4,
-    closed: 0x16a34a, open: 0xdc2626, housing: 0x4a5a6e, lever: 0x28323f,
-    accent: 0x2563eb, teal: 0x0d9488, purple: 0x7c3aed,
+    busOn:     0x0088FF, // Vibrant azure blue (from digital city image)
+    busBypass: 0x00E5FF, // Vibrant cyan-blue for bypass
+    busOff:    0xBDD1E0, // Light ice-blue/grey for inactive pipes
+    gray:      0xE2E8F0, // Clean light grey/white for inactive cabinets
+    closed:    0x0088FF, // Azure blue for closed breakers
+    open:      0x94A3B8, // Sleek grey for open breakers
+    housing:   0xFFFFFF, // Pure white for breaker housings
+    lever:     0x0088FF, // Azure blue for levers
+    // Base cabinet colors (white/light-grey glossy towers)
+    incomer:   0xF8FAFC, 
+    ups:       0xF8FAFC, 
+    load:      0xF8FAFC, 
   };
 
   function makePipe(a, b, r, color) {
     const dirv = new THREE.Vector3().subVectors(b, a);
     const len = dirv.length();
-    const geo = new THREE.CylinderGeometry(r, r, len, 12, 1);
-    const mat = new THREE.MeshStandardMaterial({ color, roughness: .45, metalness: .35 });
+    const geo = new THREE.CylinderGeometry(r, r, len, 14, 1);
+    const mat = new THREE.MeshStandardMaterial({
+      color,
+      roughness: 0.08,
+      metalness: 0.12,
+      transparent: true,
+      opacity: 0.85,
+      emissive: new THREE.Color(0x000000),
+      emissiveIntensity: 0
+    });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
@@ -124,16 +155,25 @@ function _setup(mount, fallback, onCBClick) {
     g.position.set(x, 0, 0);
     const body = new THREE.Mesh(
       new THREE.BoxGeometry(2.4, 2.6, 1.9),
-      new THREE.MeshStandardMaterial({ color, roughness: .48, metalness: .28, emissive: 0x000000 })
+      new THREE.MeshStandardMaterial({
+        color: color,
+        roughness: 0.15,
+        metalness: 0.05,
+        emissive: new THREE.Color(0x000000),
+        emissiveIntensity: 0
+      })
     );
     body.position.y = 1.3;
+    body.castShadow = true;
+    body.receiveShadow = true;
     g.add(body);
     const cap = new THREE.Mesh(
       new THREE.BoxGeometry(2.5, 0.12, 2.0),
-      new THREE.MeshStandardMaterial({ color: 0x2e3d4f, roughness: .55 })
+      new THREE.MeshStandardMaterial({ color: 0x0088FF, roughness: 0.15, metalness: 0.20 })
     );
     cap.position.y = 2.62;
-
+    cap.castShadow = true;
+    cap.receiveShadow = true;
     g.add(cap);
     makePipe(new THREE.Vector3(x, 2.6, 0), new THREE.Vector3(x, Y_BUS, 0), 0.06, COL.busOff);
     const div = document.createElement("div");
@@ -142,12 +182,17 @@ function _setup(mount, fallback, onCBClick) {
     const lbl = new CSS2DObject(div);
     lbl.position.set(0, 3.5, 0);
     g.add(lbl);
+
+    // Pre-compute a brightened emissive color (50% lerp toward white)
+    const _ec = new THREE.Color(color).lerp(new THREE.Color(0xFFFFFF), 0.5);
+    const emissiveHex = _ec.getHex();
+
     scene.add(g);
-    cabinets[key] = { body, baseColor: color, valsEl: div.querySelector("[data-vals]") };
+    cabinets[key] = { body, baseColor: color, emissiveHex, valsEl: div.querySelector("[data-vals]") };
   }
-  makeCabinet("INC", NODE.INC, COL.purple, "INC1");
-  makeCabinet("UPS", NODE.UPS, COL.teal, "UPS");
-  makeCabinet("LOAD", NODE.LOAD, COL.accent, "LOAD");
+  makeCabinet("INC", NODE.INC, COL.incomer, "INC1");
+  makeCabinet("UPS", NODE.UPS, COL.ups, "UPS");
+  makeCabinet("LOAD", NODE.LOAD, COL.load, "LOAD");
 
   (() => {
     const g = new THREE.Group();
@@ -178,8 +223,8 @@ function _setup(mount, fallback, onCBClick) {
   const segGI = makePipe(new THREE.Vector3(NODE.GRID, Y_BUS, 0), new THREE.Vector3(NODE.INC, Y_BUS, 0), 0.07, COL.busOff);
   const segIU = makePipe(new THREE.Vector3(NODE.INC, Y_BUS, 0), new THREE.Vector3(NODE.UPS, Y_BUS, 0), 0.07, COL.busOff);
   const segUL = makePipe(new THREE.Vector3(NODE.UPS, Y_BUS, 0), new THREE.Vector3(NODE.LOAD, Y_BUS, 0), 0.07, COL.busOff);
-  makePipe(new THREE.Vector3(NODE.INC, Y_BUS, 0), new THREE.Vector3(NODE.INC, Y_BYP, 0), 0.06, COL.busOff);
-  makePipe(new THREE.Vector3(NODE.LOAD, Y_BUS, 0), new THREE.Vector3(NODE.LOAD, Y_BYP, 0), 0.06, COL.busOff);
+  const segBPL = makePipe(new THREE.Vector3(NODE.INC, Y_BUS, 0), new THREE.Vector3(NODE.INC, Y_BYP, 0), 0.06, COL.busOff);
+  const segBPR = makePipe(new THREE.Vector3(NODE.LOAD, Y_BUS, 0), new THREE.Vector3(NODE.LOAD, Y_BYP, 0), 0.06, COL.busOff);
   const segBP = makePipe(new THREE.Vector3(NODE.INC, Y_BYP, 0), new THREE.Vector3(NODE.LOAD, Y_BYP, 0), 0.07, COL.busOff);
 
   const breakerMeshes = {};
@@ -188,10 +233,11 @@ function _setup(mount, fallback, onCBClick) {
     g.position.set(x, y, 0);
     const housing = new THREE.Mesh(
       new THREE.BoxGeometry(0.7, 0.95, 0.7),
-      new THREE.MeshStandardMaterial({ color: COL.housing, roughness: .48, metalness: .42 })
+      new THREE.MeshStandardMaterial({ color: COL.housing, roughness: 0.35, metalness: 0.55 })
     );
     housing.userData.cb = name;
-
+    housing.castShadow = true;
+    housing.receiveShadow = true;
     g.add(housing);
     const ind = new THREE.Mesh(
       new THREE.SphereGeometry(0.16, 12, 12),
@@ -221,19 +267,22 @@ function _setup(mount, fallback, onCBClick) {
     scene.add(g);
     breakerMeshes[name] = { group: g, ind, lpivot, stEl: div.querySelector("[data-st]") };
   }
-  makeBreaker("CB_INC",    (NODE.GRID + NODE.INC) / 2,  Y_BUS);
-  makeBreaker("CB_UPS",    (NODE.INC + NODE.UPS) / 2,   Y_BUS);
-  makeBreaker("CB_LOAD",   (NODE.UPS + NODE.LOAD) / 2,  Y_BUS);
-  makeBreaker("CB_BYPASS", (NODE.INC + NODE.LOAD) / 2,  Y_BYP);
+  makeBreaker("CB_INC", (NODE.GRID + NODE.INC) / 2, Y_BUS);
+  makeBreaker("CB_UPS", (NODE.INC + NODE.UPS) / 2, Y_BUS);
+  makeBreaker("CB_LOAD", (NODE.UPS + NODE.LOAD) / 2, Y_BUS);
+  makeBreaker("CB_BYPASS", (NODE.INC + NODE.LOAD) / 2, Y_BYP);
 
-  // Flow particles – smoother geometry
-  const flowMat = new THREE.MeshStandardMaterial({
-    color: 0x22c55e, emissive: 0x22c55e, emissiveIntensity: 1.1,
+  // Flow particles
+  const flowMatGreen = new THREE.MeshStandardMaterial({
+    color: COL.busOn, emissive: COL.busOn, emissiveIntensity: 0.9,
+  });
+  const flowMatOrange = new THREE.MeshStandardMaterial({
+    color: COL.busBypass, emissive: COL.busBypass, emissiveIntensity: 0.9,
   });
   const segments = [];
-  function makeFlowSeg(x1, x2, y, energizedFn) {
+  function makeFlowSeg(x1, x2, y, flowMat, energizedFn) {
     const from = new THREE.Vector3(x1, y, 0);
-    const to   = new THREE.Vector3(x2, y, 0);
+    const to = new THREE.Vector3(x2, y, 0);
     const spheres = [];
     for (let i = 0; i < 5; i++) {
       const s = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), flowMat);
@@ -244,14 +293,14 @@ function _setup(mount, fallback, onCBClick) {
     segments.push({ from, to, spheres, energizedFn });
   }
   const cl = (n) => _latest.breakers[n] && _latest.breakers[n].state === "closed";
-  makeFlowSeg(NODE.GRID, NODE.INC,  Y_BUS, () => _latest.energize.inc);
-  makeFlowSeg(NODE.INC,  NODE.UPS,  Y_BUS, () => _latest.energize.ups);
-  makeFlowSeg(NODE.UPS,  NODE.LOAD, Y_BUS, () => _latest.energize.ups && cl("CB_LOAD"));
-  makeFlowSeg(NODE.INC,  NODE.LOAD, Y_BYP, () => _latest.energize.inc && cl("CB_BYPASS") && cl("CB_LOAD"));
+  makeFlowSeg(NODE.GRID, NODE.INC, Y_BUS, flowMatGreen, () => _latest.energize.inc);
+  makeFlowSeg(NODE.INC, NODE.UPS, Y_BUS, flowMatGreen, () => _latest.energize.ups);
+  makeFlowSeg(NODE.UPS, NODE.LOAD, Y_BUS, flowMatGreen, () => _latest.energize.ups && cl("CB_LOAD"));
+  makeFlowSeg(NODE.INC, NODE.LOAD, Y_BYP, flowMatOrange, () => _latest.energize.inc && cl("CB_BYPASS") && cl("CB_LOAD"));
 
   // Raycaster for CB click
   const raycaster = new THREE.Raycaster();
-  const pointer   = new THREE.Vector2();
+  const pointer = new THREE.Vector2();
   let downPos = null;
   renderer.domElement.addEventListener("pointerdown", (e) => { downPos = { x: e.clientX, y: e.clientY }; });
   renderer.domElement.addEventListener("pointerup", (e) => {
@@ -260,8 +309,8 @@ function _setup(mount, fallback, onCBClick) {
     downPos = null;
     if (moved > 6) return;
     const rect = renderer.domElement.getBoundingClientRect();
-    pointer.x = ((e.clientX - rect.left) / rect.width)  *  2 - 1;
-    pointer.y = -((e.clientY - rect.top)  / rect.height) *  2 + 1;
+    pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
     for (const h of raycaster.intersectObjects(scene.children, true)) {
       const cb = h.object.userData && h.object.userData.cb;
@@ -269,8 +318,13 @@ function _setup(mount, fallback, onCBClick) {
     }
   });
 
-  const getv  = (n) => (_latest.tags[n] ? _latest.tags[n].value : null);
-  const tint  = (mat, on) => mat.color.setHex(on ? COL.busOn : COL.busOff);
+  const getv = (n) => (_latest.tags[n] ? _latest.tags[n].value : null);
+  const tint = (mat, on, activeColor = COL.busOn) => {
+    mat.color.setHex(on ? activeColor : COL.busOff);
+    mat.emissive.setHex(on ? activeColor : 0x000000);
+    mat.emissiveIntensity = on ? 0.9 : 0;
+    mat.opacity = on ? 0.95 : 0.75;
+  };
 
   _applyState = () => {
     for (const name in breakerMeshes) {
@@ -281,25 +335,31 @@ function _setup(mount, fallback, onCBClick) {
       m.ind.material.color.setHex(c);
       m.ind.material.emissive.setHex(c);
       m.stEl.textContent = closed ? "CLOSED" : "OPEN";
-      m.stEl.className   = "s " + (closed ? "closed" : "open");
+      m.stEl.className = "s " + (closed ? "closed" : "open");
       m.lpivot.rotation.x = closed ? 0 : -1.0;
     }
     const e = _latest.energize;
-    tint(segGI, e.inc);
-    tint(segIU, e.ups);
-    tint(segUL, e.ups && cl("CB_LOAD"));
-    tint(segBP, e.inc && cl("CB_BYPASS"));
-    const setCab = (key, on) => {
+    tint(segGI, e.inc, COL.busOn);
+    tint(segIU, e.ups, COL.busOn);
+    tint(segUL, e.ups && cl("CB_LOAD"), COL.busOn);
+    tint(segBPL, e.inc, COL.busBypass);
+    tint(segBP, e.inc && cl("CB_BYPASS"), COL.busBypass);
+    tint(segBPR, e.inc && cl("CB_BYPASS") && cl("CB_LOAD"), COL.busBypass);
+
+    const setCab = (key, on, activeColor = COL.busOn) => {
       const c = cabinets[key]; if (!c) return;
-      c.body.material.color.setHex(on ? c.baseColor : COL.gray);
-      c.body.material.emissive.setHex(on ? c.baseColor : 0x000000);
-      c.body.material.emissiveIntensity = on ? 0.14 : 0;
+      c.body.material.color.setHex(on ? 0xF8FAFC : 0xD2DBE4); // Glossy white when active, cool light gray-blue when de-energized
+      c.body.material.emissive.setHex(on ? activeColor : 0x000000);
+      c.body.material.emissiveIntensity = on ? 0.55 : 0; // High-tech glowing slot effect
     };
-    setCab("INC",  e.inc);
-    setCab("UPS",  e.ups);
-    setCab("LOAD", e.load);
-    if (cabinets.INC)  cabinets.INC.valsEl.innerHTML  = `${fmt(getv("INC1_VL12"), "V")} V · ${fmt(getv("INC1_IL1"), "A")} A`;
-    if (cabinets.UPS)  cabinets.UPS.valsEl.innerHTML  = `${fmt(getv("UPS_P_LoadTotal"), "%")}% load · ${fmt(getv("UPS_SOC_Battery"), "%")}% SOC`;
+    const isBypassActive = e.inc && cl("CB_BYPASS");
+    const loadColor = isBypassActive ? COL.busBypass : COL.busOn;
+
+    setCab("INC",  e.inc, COL.busOn);
+    setCab("UPS",  e.ups, COL.busOn);
+    setCab("LOAD", e.load, loadColor);
+    if (cabinets.INC) cabinets.INC.valsEl.innerHTML = `${fmt(getv("INC1_VL12"), "V")} V · ${fmt(getv("INC1_IL1"), "A")} A`;
+    if (cabinets.UPS) cabinets.UPS.valsEl.innerHTML = `${fmt(getv("UPS_P_LoadTotal"), "%")}% load · ${fmt(getv("UPS_SOC_Battery"), "%")}% SOC`;
     if (cabinets.LOAD) cabinets.LOAD.valsEl.innerHTML = `${fmt(getv("LOAD_VL1N"), "V")} V · ${fmt(getv("LOAD_Freq"), "Hz")} Hz`;
   };
 
@@ -314,8 +374,20 @@ function _setup(mount, fallback, onCBClick) {
   const tmp = new THREE.Vector3();
   let lastTime = performance.now();
 
-  (function animate() {
+  const fps = 30;
+  const interval = 1000 / fps;
+  let lastRenderTime = 0;
+
+  (function animate(timestamp) {
     requestAnimationFrame(animate);
+
+    if (document.hidden) return; // skip rendering if tab is hidden
+
+    const elapsed = timestamp - lastRenderTime;
+    if (elapsed < interval) return;
+
+    lastRenderTime = timestamp - (elapsed % interval);
+
     const now = performance.now();
     const dt = Math.min((now - lastTime) / 1000, 0.05);
     lastTime = now;
@@ -335,5 +407,5 @@ function _setup(mount, fallback, onCBClick) {
 
     renderer.render(scene, camera);
     labelRenderer.render(scene, camera);
-  })();
+  })(0);
 }

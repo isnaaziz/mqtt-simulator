@@ -19,41 +19,55 @@ function setBroker(on) {
 }
 
 function onUpdate(msg) {
-  $("rtuName").textContent = msg.rtu || "UPS HMI · ONE-LINE";
+  $("rtuName").textContent = msg.rtu || "UPS CyberTwin Console";
   $("prefix").textContent = "TOPIC PREFIX · " + (msg.prefix || "—");
   if (msg.ts) $("ts").textContent = new Date(msg.ts).toLocaleTimeString("id-ID");
   setBroker(!!msg.mqtt);
 
-  if (msg.tags) {
-    const prev = Object.assign({}, tags);
-    buildGrid(msg.tags);
-    for (const t of msg.tags) tags[t.name] = t;
-    updateTags(msg.tags, prev);
-    if (getActiveTag()) refreshDrawer();
-  }
-
   if (msg.breakers) {
+    for (const b of msg.breakers) {
+      breakers[b.name] = b;
+    }
     buildCB(msg.breakers);
     updateCB(msg.breakers);
-    for (const b of msg.breakers) breakers[b.name] = b;
+  }
+
+  if (msg.tags) {
+    for (const t of msg.tags) {
+      tags[t.name] = t;
+    }
+    const prev = Object.assign({}, tags);
+    buildGrid(msg.tags);
+    updateTags(msg.tags, prev);
+    if (getActiveTag()) refreshDrawer();
+
+
   }
 
   update3D({ tags, breakers, energize: computeEnergize() });
 }
 
-$("autoAll").onclick = () => send({ action: "auto_all" });
-$("manualAll").onclick = () => send({ action: "manual_all" });
+$("autoAll").onclick = () => {
+  send({ action: "auto_all" });
+};
+$("manualAll").onclick = () => {
+  send({ action: "manual_all" });
+};
 
 initUI(
   (name) => openDrawer(name),
-  (name, state) => send({ action: "cb_set", tag: name, state })
+  (name, state) => {
+    send({ action: "cb_set", tag: name, state });
+  }
 );
 
 initDrawer(tags);
 
 init3D(
   $("scene3d"),
-  (name) => send({ action: "cb_toggle", tag: name })
+  (name) => {
+    send({ action: "cb_toggle", tag: name });
+  }
 );
 
 connect(onUpdate, setConn);

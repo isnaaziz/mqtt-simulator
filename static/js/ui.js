@@ -21,7 +21,7 @@ export function buildGrid(list) {
     if (!(t.category in idx)) { idx[t.category] = groups.length; groups.push({ cat: t.category, items: [] }); }
     groups[idx[t.category]].items.push(t);
   }
-  const palette = { LOAD: "#3b82f6", INC: "#8b5cf6", UPS: "#06b6d4" };
+  const palette = { LOAD: "#2563EB", INC: "#7C3AED", UPS: "#0284C7" };
   for (const g of groups) {
     const sec = document.createElement("section");
     sec.className = "group";
@@ -123,21 +123,62 @@ export function updateTags(list, prevSnapshot) {
 
     // Fill the 6 bars (column-reverse ensures filling bottom-to-top)
     const activeCount = Math.round((pct / 100) * 6);
-    const palette = { LOAD: "#3b82f6", INC: "#8b5cf6", UPS: "#06b6d4" };
-    const activeColor = t.mode === "manual" ? "var(--manual)" : (palette[r.category] || "var(--accent)");
-    const activeGlow = t.mode === "manual" ? "0 0 4px var(--manual)" : `0 0 4px ${activeColor}`;
+    const palette = { LOAD: "#2563EB", INC: "#7C3AED", UPS: "#0284C7" };
+    const activeColor = t.mode === "manual" ? "var(--warning)" : (palette[r.category] || "var(--accent)");
 
     r.bars.forEach((bar, idx) => {
       if (idx < activeCount) {
         bar.style.background = activeColor;
-        bar.style.boxShadow = activeGlow;
+        bar.style.boxShadow = "none";
       } else {
-        bar.style.background = "rgba(0, 0, 0, 0.08)";
+        bar.style.background = "#E2E8F0";
         bar.style.boxShadow = "none";
       }
     });
   }
   document.getElementById("manCount").textContent = manual;
+
+  // Update KPI Row
+  const getVal = (name) => {
+    const t = list.find(x => x.name === name);
+    return t ? t.value : 0;
+  };
+  const vIncVolts = getVal("INC1_VL1N");
+  const vIncAmps = getVal("INC1_IL1");
+  const vLoadTotal = getVal("UPS_P_LoadTotal");
+  const vSoc = getVal("UPS_SOC_Battery");
+  const vBatVolts = getVal("UPS_V_Battery");
+  const vTemp = getVal("UPS_Temp");
+
+  const kpiGrid = document.getElementById("kpiGrid");
+  const kpiGridCard = document.getElementById("kpiGridCard");
+  if (kpiGrid && kpiGridCard) {
+    kpiGrid.textContent = `${fmt(vIncVolts, "V")} V / ${fmt(vIncAmps, "A")} A`;
+    kpiGridCard.classList.toggle("active", vIncVolts > 50);
+  }
+
+  const kpiLoad = document.getElementById("kpiLoad");
+  const kpiLoadCard = document.getElementById("kpiLoadCard");
+  if (kpiLoad && kpiLoadCard) {
+    kpiLoad.textContent = `${fmt(vLoadTotal, "%")}%`;
+    kpiLoadCard.classList.toggle("active", vLoadTotal > 1);
+    kpiLoadCard.classList.toggle("warning", vLoadTotal > 80);
+  }
+
+  const kpiBattery = document.getElementById("kpiBattery");
+  const kpiBatteryCard = document.getElementById("kpiBatteryCard");
+  if (kpiBattery && kpiBatteryCard) {
+    kpiBattery.textContent = `${fmt(vSoc, "%")}% (${fmt(vBatVolts, "V")} V)`;
+    kpiBatteryCard.classList.toggle("active", vSoc > 90);
+    kpiBatteryCard.classList.toggle("warning", vSoc < 50);
+  }
+
+  const kpiTemp = document.getElementById("kpiTemp");
+  const kpiTempCard = document.getElementById("kpiTempCard");
+  if (kpiTemp && kpiTempCard) {
+    kpiTemp.textContent = `${fmt(vTemp, "degC")}°C`;
+    kpiTempCard.classList.toggle("warning", vTemp > 45);
+  }
 }
 
 export function updateCB(list) {

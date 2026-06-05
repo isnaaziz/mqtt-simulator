@@ -71,10 +71,10 @@ func main() {
 	}
 	defer client.Disconnect(250)
 
-	// We publish "closed" to see if it changes from "open"
-	cmdTopic := "UPS_07_DUY/CMD"
-	payload := `{"action":"cb_set","tag":"CB_INC","state":"open"}`
-	fmt.Printf("Publishing command to MQTT: topic=%s payload=%s\n", cmdTopic, payload)
+	// We publish remote control command open (value: 0) to CB_INC
+	cmdTopic := "UPS_07_DUY/CMD/CB_INC"
+	payload := `{"value":0}`
+	fmt.Printf("Publishing RC command to MQTT: topic=%s payload=%s\n", cmdTopic, payload)
 	token := client.Publish(cmdTopic, 0, false, payload)
 	token.Wait()
 

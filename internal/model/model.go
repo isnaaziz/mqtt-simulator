@@ -40,3 +40,7 @@ type ControlMsg struct {
 	Value  float64 `json:"value"`
 	State  string  `json:"state"`
 }
+
+type RCCommand struct {
+	Value interface{} `json:"value"` // 0/1 or analog value (float or string)
+}

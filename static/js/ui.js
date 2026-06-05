@@ -48,9 +48,9 @@ export function buildGrid(list) {
         </div>`;
       card.onclick = () => _onCardClick && _onCardClick(t.name);
       grid.appendChild(card);
-      _refs[t.name] = { 
-        card, 
-        val: card.querySelector(".val"), 
+      _refs[t.name] = {
+        card,
+        val: card.querySelector(".val"),
         badge: card.querySelector(".badge"),
         bars: Array.from(card.querySelectorAll(".card-rack-bar")),
         category: t.category

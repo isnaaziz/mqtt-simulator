@@ -12,30 +12,30 @@
   --text-tertiary: #94A3B8;
 
   /* Semantic status */
-  --accent: #2E5BFF;
-  --accent-dim: rgba(46, 91, 255, 0.08);
-  --success: #2E5BFF;
-  --success-dim: rgba(46, 91, 255, 0.08);
+  --accent: #4A68E9;
+  --accent-dim: rgba(74, 104, 233, 0.08);
+  --success: #4A68E9;
+  --success-dim: rgba(74, 104, 233, 0.08);
   --warning: #8B5CF6;
   --warning-dim: rgba(139, 92, 246, 0.08);
   --danger: #94A3B8;
   --danger-dim: rgba(148, 163, 184, 0.10);
 
   /* Legacy aliases (used by inline HTML and JS-generated markup) */
-  --ok: #2E5BFF;
+  --ok: #4A68E9;
   --muted: #64748B;
   --dim: #94A3B8;
-  --closed: #2E5BFF;
+  --closed: #4A68E9;
   --open: #94A3B8;
   --mono: 'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
-  --disp: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  --disp: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
 
   /* Elevation shadows */
-  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 8px 16px -4px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 16px 24px -4px rgba(15, 23, 42, 0.10), 0 6px 8px -2px rgba(15, 23, 42, 0.05);
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.03);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+  --shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.02);
+  --shadow-md: 0 8px 16px -4px rgba(15, 23, 42, 0.06), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
+  --shadow-lg: 0 16px 24px -4px rgba(15, 23, 42, 0.08), 0 6px 8px -2px rgba(15, 23, 42, 0.03);
 
   /* Legacy (used in old CSS selectors that JS might depend on) */
   --glass-shadow: var(--shadow-sm);
@@ -99,7 +99,7 @@ header {
   place-items: center;
   background: var(--accent);
   flex-shrink: 0;
-  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 1px 4px rgba(74, 104, 233, 0.3);
 }
 
 .logo svg {
@@ -110,9 +110,9 @@ header {
 }
 
 .brand h1 {
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
   color: var(--text);
 }
 
@@ -147,18 +147,18 @@ header {
 
 .stat .k {
   font-size: 9px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-tertiary);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .stat .v {
-  font-family: var(--mono);
+  font-family: var(--disp);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 800;
   color: var(--text);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   margin-top: 2px;
 }
 
@@ -203,7 +203,7 @@ header {
 
 .conn.on {
   color: var(--success);
-  border-color: rgba(46, 91, 255, 0.25);
+  border-color: rgba(74, 104, 233, 0.25);
   background: var(--success-dim);
 }
 
@@ -228,10 +228,10 @@ header {
 .btn {
   font-family: var(--disp);
   font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.005em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   padding: 7px 14px;
-  border-radius: 7px;
+  border-radius: 8px;
   cursor: pointer;
   background: var(--surface);
   color: var(--text-secondary);
@@ -248,7 +248,7 @@ header {
 }
 
 .btn-auto:hover {
-  border-color: rgba(46, 91, 255, 0.4);
+  border-color: rgba(74, 104, 233, 0.4);
   color: var(--success);
   background: var(--success-dim);
 }
@@ -298,28 +298,24 @@ main>section {
 .kpi-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-bottom: 4px solid var(--border-strong);
-  /* Tactile 3D bottom edge */
   border-radius: 12px;
-  padding: 18px 22px 22px;
+  padding: 20px 22px;
   box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, border-color 0.15s ease, border-bottom-width 0.15s ease;
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .kpi-card:hover {
   transform: translateY(-2px);
-  border-bottom-width: 6px;
   box-shadow: var(--shadow);
   border-color: var(--border-strong);
 }
 
 .kpi-card:active {
-  transform: translateY(2px);
-  border-bottom-width: 2px;
+  transform: translateY(0);
   box-shadow: var(--shadow-xs);
 }
 
@@ -330,21 +326,20 @@ main>section {
 
 .kpi-label {
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-tertiary);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   margin-bottom: 8px;
 }
 
 .kpi-val {
-  font-family: var(--mono);
-  font-size: 22px;
-  font-weight: 600;
+  font-family: var(--disp);
+  font-size: 23px;
+  font-weight: 800;
   color: var(--text);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
   line-height: 1;
-  font-variant-numeric: tabular-nums;
 }
 
 .kpi-icon {
@@ -390,13 +385,12 @@ main>section {
 }
 
 .sec-title h2 {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 800;
   color: var(--text);
-  letter-spacing: -0.005em;
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
 }
 
 .sec-title .count {
@@ -578,44 +572,39 @@ main>section {
 .cb-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-bottom: 4px solid var(--border-strong);
-  /* Tactile 3D bottom edge */
   border-radius: 12px;
-  padding: 16px 20px 20px;
+  padding: 18px 20px;
   box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
-  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, border-color 0.15s ease, border-bottom-width 0.15s ease, border-bottom-color 0.15s ease;
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .cb-card:hover {
   transform: translateY(-2px);
-  border-bottom-width: 6px;
   box-shadow: var(--shadow);
   border-color: var(--border-strong);
 }
 
 .cb-card:active {
-  transform: translateY(2px);
-  border-bottom-width: 2px;
+  transform: translateY(0);
   box-shadow: var(--shadow-xs);
 }
 
 .cb-card.closed {
-  border-bottom-color: var(--success);
-  /* Dynamic blue highlight when closed/active */
+  border-color: var(--success);
+  box-shadow: 0 4px 12px rgba(74, 104, 233, 0.05), var(--shadow-sm);
 }
 
 .cb-card.open {
-  border-bottom-color: var(--border-strong);
-  /* Neutral grey highlight when open */
+  border-color: var(--border);
 }
 
 .cb-card .label {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 13.5px;
+  font-weight: 700;
   color: var(--text);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 .cb-card .tag {
@@ -632,9 +621,10 @@ main>section {
   align-items: center;
   gap: 6px;
   margin: 12px 0;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-family: var(--disp);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
   padding: 4px 9px;
   border-radius: 5px;
   text-transform: uppercase;
@@ -650,7 +640,7 @@ main>section {
 .cb-card.closed .cb-state {
   color: var(--success);
   background: var(--success-dim);
-  border: 1px solid rgba(46, 91, 255, 0.2);
+  border: 1px solid rgba(74, 104, 233, 0.2);
 }
 
 .cb-card.closed .cb-state i {
@@ -734,15 +724,12 @@ main>section {
 .card {
   position: relative;
   cursor: pointer;
-  padding: 11px 15px 15px;
-  /* adjust padding for 3D bottom lip */
+  padding: 13px 15px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-bottom: 3.5px solid var(--border-strong);
-  /* Tactile 3D bottom edge */
   border-radius: 10px;
   box-shadow: var(--shadow-xs);
-  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, border-color 0.15s ease, border-bottom-width 0.15s ease, border-bottom-color 0.15s ease;
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, border-color 0.15s ease;
   overflow: hidden;
   display: flex;
   justify-content: space-between;
@@ -752,21 +739,17 @@ main>section {
 
 .card:hover {
   transform: translateY(-2px);
-  border-bottom-width: 5.5px;
   box-shadow: var(--shadow);
   border-color: var(--border-strong);
 }
 
 .card:active {
-  transform: translateY(1.5px);
-  border-bottom-width: 1.5px;
+  transform: translateY(0);
   box-shadow: var(--shadow-xs);
 }
 
 .card.manual {
-  border-color: rgba(139, 92, 246, 0.28);
-  border-bottom-color: var(--warning);
-  /* Violet 3D edge for overridden tags */
+  border-color: var(--warning);
   background: rgba(139, 92, 246, 0.02);
 }
 
@@ -793,12 +776,13 @@ main>section {
 }
 
 .card .name {
-  font-family: var(--mono);
-  font-size: 9.5px;
-  font-weight: 500;
-  color: var(--text-tertiary);
+  font-family: var(--disp);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-secondary);
   word-break: break-all;
-  line-height: 1.4;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
 }
 
 .card .read {
@@ -809,21 +793,21 @@ main>section {
 }
 
 .card .val {
-  font-family: var(--mono);
-  font-size: 19px;
-  font-weight: 600;
+  font-family: var(--disp);
+  font-size: 20px;
+  font-weight: 800;
   color: var(--text);
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
   line-height: 1;
   transition: color 0.2s;
 }
 
 .card .unit {
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 500;
+  font-family: var(--disp);
+  font-size: 10px;
+  font-weight: 600;
   color: var(--text-tertiary);
+  letter-spacing: -0.01em;
 }
 
 .card .badge {
@@ -838,7 +822,7 @@ main>section {
   border-radius: 4px;
   color: var(--accent);
   background: var(--accent-dim);
-  border: 1px solid rgba(37, 99, 235, 0.12);
+  border: 1px solid rgba(74, 104, 233, 0.12);
   text-transform: uppercase;
 }
 
@@ -1009,7 +993,7 @@ main>section {
 
 .mode-toggle button.on-auto {
   background: var(--success-dim);
-  border-color: rgba(46, 91, 255, 0.28);
+  border-color: rgba(74, 104, 233, 0.28);
   color: var(--success);
   font-weight: 600;
 }

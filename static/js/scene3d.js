@@ -113,14 +113,14 @@ function _setup(mount, fallback, onCBClick) {
   const Y_BYP = 4.7;
   const NODE = { GRID: -11, INC: -5.5, UPS: 0, LOAD: 6.5 };
   const COL = {
-    busOn:     0x0088FF, // Vibrant azure blue (from digital city image)
+    busOn:     0x4A68E9, // Softer corporate blue
     busBypass: 0x00E5FF, // Vibrant cyan-blue for bypass
     busOff:    0xBDD1E0, // Light ice-blue/grey for inactive pipes
     gray:      0xE2E8F0, // Clean light grey/white for inactive cabinets
-    closed:    0x0088FF, // Azure blue for closed breakers
+    closed:    0x4A68E9, // Softer blue for closed breakers
     open:      0x94A3B8, // Sleek grey for open breakers
     housing:   0xFFFFFF, // Pure white for breaker housings
-    lever:     0x0088FF, // Azure blue for levers
+    lever:     0x4A68E9, // Softer blue for levers
     // Base cabinet colors (white/light-grey glossy towers)
     incomer:   0xF8FAFC, 
     ups:       0xF8FAFC, 
@@ -169,7 +169,7 @@ function _setup(mount, fallback, onCBClick) {
     g.add(body);
     const cap = new THREE.Mesh(
       new THREE.BoxGeometry(2.5, 0.12, 2.0),
-      new THREE.MeshStandardMaterial({ color: 0x0088FF, roughness: 0.15, metalness: 0.20 })
+      new THREE.MeshStandardMaterial({ color: 0x4A68E9, roughness: 0.15, metalness: 0.20 })
     );
     cap.position.y = 2.62;
     cap.castShadow = true;

@@ -4,11 +4,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UPS Digital Twin · Simulator Platform</title>
+  <title>UPS MQTT Simulator · Simulator Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
     rel="stylesheet" />
   <script type="importmap">
   {
@@ -27,11 +27,14 @@
       <div class="logo">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
           stroke-linejoin="round">
-          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          <circle cx="12" cy="9.5" r="5" />
+          <circle cx="12" cy="14.5" r="5" />
+          <path d="M12 2v2.5" />
+          <path d="M12 19.5v2.5" />
         </svg>
       </div>
       <div>
-        <h1 id="rtuName">UPS Digital Twin</h1>
+        <h1 id="rtuName">UPS MQTT Simulator</h1>
         <div class="sub" id="prefix">INITIALIZING...</div>
       </div>
     </div>
@@ -60,7 +63,15 @@
           <div class="kpi-val" id="kpiGrid">- V</div>
         </div>
         <div class="kpi-icon">
-          <svg width="20" height="20" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M4 22L10 2M20 22L14 2" />
+            <path d="M6 14h12" />
+            <path d="M8 7h8" />
+            <path d="M10 2h4" />
+            <path d="M6 14l6-7 6 7" />
+            <path d="M2 14h4M18 14h4" />
+          </svg>
         </div>
       </div>
       <div class="kpi-card" id="kpiLoadCard">
@@ -69,7 +80,12 @@
           <div class="kpi-val" id="kpiLoad">- %</div>
         </div>
         <div class="kpi-icon">
-          <svg width="20" height="20" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M12 2a10 10 0 0 1 7.54 16.59M12 2A10 10 0 0 0 4.46 18.59" />
+            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+            <path d="M12 12l5-5" />
+          </svg>
         </div>
       </div>
       <div class="kpi-card" id="kpiBatteryCard">
@@ -78,7 +94,12 @@
           <div class="kpi-val" id="kpiBattery">- %</div>
         </div>
         <div class="kpi-icon">
-          <svg width="20" height="20" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="16" height="10" rx="2" ry="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" viewBox="0 0 24 24">
+            <rect x="2" y="6" width="16" height="12" rx="2" ry="2" />
+            <path d="M22 10v4" />
+            <path d="M11 9l-3 3.5h3.5V15l3-3.5h-3.5V9z" />
+          </svg>
         </div>
       </div>
       <div class="kpi-card" id="kpiTempCard">
@@ -87,7 +108,12 @@
           <div class="kpi-val" id="kpiTemp">- °C</div>
         </div>
         <div class="kpi-icon">
-          <svg width="20" height="20" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+            <path d="M12 9h2" />
+            <path d="M12 6h2" />
+          </svg>
         </div>
       </div>
     </div>
@@ -128,7 +154,8 @@
         <span class="count" id="tagCount">0</span>
       </div>
       <div id="board">
-        <div style="text-align:center;padding:40px 0;color:var(--muted);font-family:var(--mono)">Connecting to simulator...</div>
+        <div style="text-align:center;padding:40px 0;color:var(--muted);font-family:var(--mono)">Connecting to
+          simulator...</div>
       </div>
     </div>
   </main>

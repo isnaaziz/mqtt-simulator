@@ -1,0 +1,145 @@
+/* ────────────────────────────────────────────
+   MAIN LAYOUT
+──────────────────────────────────────────── */
+main {
+  padding: 28px 32px 80px;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+main>div,
+main>section {
+  margin-bottom: 28px;
+}
+
+/* ────────────────────────────────────────────
+   KPI ROW
+──────────────────────────────────────────── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 1100px) {
+  .kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .kpi-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 22px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: var(--border-strong);
+}
+
+.kpi-card:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-xs);
+}
+
+.kpi-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.kpi-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.kpi-val {
+  font-family: var(--disp);
+  font-size: 23px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.kpi-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.kpi-icon svg {
+  stroke: var(--text-tertiary);
+}
+
+.kpi-card.active .kpi-val {
+  color: var(--success);
+}
+
+.kpi-card.warning .kpi-val {
+  color: var(--warning);
+}
+
+/* ────────────────────────────────────────────
+   SECTION TITLES
+──────────────────────────────────────────── */
+.sec-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sec-title .bar {
+  width: 3px;
+  height: 16px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.sec-title h2 {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sec-title .count {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  margin-left: auto;
+  background: var(--surface-secondary);
+  padding: 3px 8px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+}

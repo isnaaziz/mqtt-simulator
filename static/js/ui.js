@@ -138,6 +138,13 @@ export function updateTags(list, prevSnapshot) {
   }
   document.getElementById("manCount").textContent = manual;
 
+  const autoAllBtn = document.getElementById("autoAll");
+  const manualAllBtn = document.getElementById("manualAll");
+  if (autoAllBtn && manualAllBtn) {
+    autoAllBtn.classList.toggle("active", manual === 0);
+    manualAllBtn.classList.toggle("active", list.length > 0 && manual === list.length);
+  }
+
   // Update KPI Row
   const getVal = (name) => {
     const t = list.find(x => x.name === name);

@@ -48,16 +48,20 @@ func computeAuto(t *model.TagState) float64 {
 	if t.Cum {
 		return prev + rand.Float64()*t.Variance
 	}
-	drift := (rand.Float64()*2 - 1) * (t.Variance * 0.1)
+
+	span := t.Max - t.Min
+	if span <= 0 {
+		return t.Min
+	}
+
+	drift := (rand.Float64()*2 - 1) * (span * 0.05)
 	val := prev + drift
-	if val > t.Base+t.Variance {
-		val = t.Base + t.Variance - rand.Float64()*(t.Variance*0.1)
+
+	if val > t.Max {
+		val = t.Max - rand.Float64()*(span*0.05)
 	}
-	if val < t.Base-t.Variance {
-		val = t.Base - t.Variance + rand.Float64()*(t.Variance*0.1)
-	}
-	if t.Base >= 0 && val < 0 {
-		val = 0
+	if val < t.Min {
+		val = t.Min + rand.Float64()*(span*0.05)
 	}
 	return val
 }

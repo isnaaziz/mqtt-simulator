@@ -112,27 +112,39 @@ func (s *Simulator) HandleRC(targetName string, cmd model.RCCommand) {
 	s.mu.Unlock()
 	log.Printf("control: RC target %s not found or invalid payload\n", targetName)
 }
-
 func (s *Simulator) applyControl(msg model.ControlMsg) (changedCB string) {
+	if msg.Action == "update_limits" {
+		if t, ok := s.tags[msg.Tag]; ok {
+			t.Min = msg.Min
+			t.Max = msg.Max
+			t.Base = (msg.Min + msg.Max) / 2
+			t.Variance = (msg.Max - msg.Min) / 2
+			log.Printf("control: updated limits for tag %s (min=%.3f, max=%.3f)\n", msg.Tag, msg.Min, msg.Max)
+		}
+		return ""
+	}
+
 	if msg.Action == "add_tag" {
 		if _, exists := s.tags[msg.Tag]; !exists && msg.Tag != "" {
 			t := model.TagState{
 				Name:     msg.Tag,
 				Category: msg.Category,
 				Unit:     msg.Unit,
-				Base:     msg.Base,
-				Variance: msg.Variance,
+				Min:      msg.Min,
+				Max:      msg.Max,
+				Base:     (msg.Min + msg.Max) / 2,
+				Variance: (msg.Max - msg.Min) / 2,
 				Cum:      msg.Cum,
 				Mode:     "auto",
-				Value:    msg.Base,
-				Manual:   msg.Base,
+				Value:    (msg.Min + msg.Max) / 2,
+				Manual:   (msg.Min + msg.Max) / 2,
 			}
 			if t.Category == "" {
 				t.Category = "LOAD"
 			}
 			s.tags[msg.Tag] = &t
 			s.order = append(s.order, msg.Tag)
-			log.Printf("control: added dynamic tag %s (base=%.3f, var=%.3f, category=%s)\n", msg.Tag, msg.Base, msg.Variance, t.Category)
+			log.Printf("control: added dynamic tag %s (min=%.3f, max=%.3f, category=%s)\n", msg.Tag, msg.Min, msg.Max, t.Category)
 		}
 		return ""
 	}

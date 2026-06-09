@@ -26,6 +26,15 @@ export function initDrawer(tagsRef) {
     const v = parseFloat($("setpoint").value);
     if (!isNaN(v)) send({ action: "set_value", tag: _activeTag, value: v });
   };
+
+  $("applySimLimits").onclick = () => {
+    if (!_activeTag) return;
+    const minVal = parseFloat($("simMin").value);
+    const maxVal = parseFloat($("simMax").value);
+    if (!isNaN(minVal) && !isNaN(maxVal) && maxVal > minVal) {
+      send({ action: "update_limits", tag: _activeTag, min: minVal, max: maxVal });
+    }
+  };
 }
 
 export function getActiveTag() { return _activeTag; }
@@ -50,6 +59,11 @@ export function openDrawer(name) {
   $("setpoint").value = Number(seed.toFixed(4));
   $("slider").value = seed;
 
+  const minVal = typeof t.min === 'number' ? t.min : (t.base - t.variance);
+  const maxVal = typeof t.max === 'number' ? t.max : (t.base + t.variance);
+  $("simMin").value = Number(minVal.toFixed(4));
+  $("simMax").value = Number(maxVal.toFixed(4));
+
   _syncMode(t.mode);
   $("drawer").classList.add("show");
   $("scrim").classList.add("show");
@@ -67,6 +81,14 @@ export function refreshDrawer() {
   if (!t) return;
   $("dLive").textContent = fmt(t.value, t.unit);
   _syncMode(t.mode);
+
+  const [min, max] = _rangeFor(t);
+  $("slider").min = min;
+  $("slider").max = max;
+  $("slider").step = (max - min) / 200 || 0.01;
+  $("rMin").textContent = fmt(min, t.unit);
+  $("rMax").textContent = fmt(max, t.unit);
+
   if (document.activeElement !== $("setpoint") && t.mode === "auto") {
     $("setpoint").value = Number(t.value.toFixed(4));
     $("slider").value = t.value;
@@ -83,9 +105,13 @@ function _step(dir) {
 }
 
 function _rangeFor(t) {
-  if (t.variance > 0) {
-    let min = t.base - t.variance * 4, max = t.base + t.variance * 4;
-    if (t.base >= 0 && min < 0) min = 0;
+  const minVal = typeof t.min === 'number' ? t.min : (t.base - t.variance);
+  const maxVal = typeof t.max === 'number' ? t.max : (t.base + t.variance);
+  const range = maxVal - minVal;
+  if (range > 0) {
+    let min = minVal - range * 1.5;
+    let max = maxVal + range * 1.5;
+    if (minVal >= 0 && min < 0) min = 0;
     return [min, max];
   }
   const span = Math.max(Math.abs(t.base) * 0.5, 100);

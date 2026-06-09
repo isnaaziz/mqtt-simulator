@@ -36,6 +36,10 @@ func New(broker, rtuID, prefix, username, password string, tags []model.TagState
 		t.Mode = "auto"
 		t.Value = t.Base
 		t.Manual = t.Base
+		if t.Min == 0 && t.Max == 0 {
+			t.Min = t.Base - t.Variance
+			t.Max = t.Base + t.Variance
+		}
 		s.tags[t.Name] = &t
 		s.order = append(s.order, t.Name)
 	}

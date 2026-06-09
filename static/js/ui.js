@@ -117,8 +117,11 @@ export function updateTags(list, prevSnapshot) {
 
     // Calculate percentage fill (0 - 100)
     let pct = 50;
-    if (t.variance > 0) {
-      pct = ((t.value - (t.base - t.variance)) / (t.variance * 2)) * 100;
+    const minVal = typeof t.min === 'number' ? t.min : (t.base - t.variance);
+    const maxVal = typeof t.max === 'number' ? t.max : (t.base + t.variance);
+    const range = maxVal - minVal;
+    if (range > 0) {
+      pct = ((t.value - minVal) / range) * 100;
     } else if (t.base > 0) {
       pct = (t.value / t.base) * 100;
     }

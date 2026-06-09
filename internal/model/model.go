@@ -27,6 +27,8 @@ type TagState struct {
 	Unit     string  `json:"unit"`
 	Base     float64 `json:"base"`
 	Variance float64 `json:"variance"`
+	Min      float64 `json:"min"`
+	Max      float64 `json:"max"`
 	Cum      bool    `json:"cum"`
 	Mode     string  `json:"mode"`
 	Manual   float64 `json:"manual"`
@@ -43,6 +45,8 @@ type ControlMsg struct {
 	Unit     string  `json:"unit,omitempty"`
 	Base     float64 `json:"base,omitempty"`
 	Variance float64 `json:"variance,omitempty"`
+	Min      float64 `json:"min,omitempty"`
+	Max      float64 `json:"max,omitempty"`
 	Cum      bool    `json:"cum,omitempty"`
 	Label    string  `json:"label,omitempty"`
 }

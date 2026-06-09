@@ -188,7 +188,14 @@
         <input type="range" id="slider" />
         <div class="range-meta"><span id="rMin">0</span><span id="rMax">100</span></div>
         <button class="apply" id="apply">Apply Setpoint</button>
-        <p class="hint">Value is published to MQTT broker continuously while Manual is active.</p>
+      </div>
+      <div class="sim-limits" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border);">
+        <p class="field-lab">Batas Simulasi (Min / Max)</p>
+        <div class="input-row" style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <input type="number" id="simMin" placeholder="Min" step="any" style="flex: 1; min-width: 0; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); text-align: center;" />
+          <input type="number" id="simMax" placeholder="Max" step="any" style="flex: 1; min-width: 0; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); text-align: center;" />
+        </div>
+        <button class="apply" id="applySimLimits" style="background: var(--accent); box-shadow: 0 1px 3px rgba(74, 104, 233, 0.25);">Simpan Batas</button>
       </div>
     </div>
   </aside>
@@ -224,12 +231,12 @@
         </div>
         <div class="form-group-row">
           <div class="form-group">
-            <label for="tagBase">Base Value</label>
-            <input type="number" id="tagBase" step="any" value="100" required />
+            <label for="tagMin">Min Value</label>
+            <input type="number" id="tagMin" step="any" value="190" required />
           </div>
           <div class="form-group">
-            <label for="tagVariance">Variance (Noise)</label>
-            <input type="number" id="tagVariance" step="any" value="5" required />
+            <label for="tagMax">Max Value</label>
+            <input type="number" id="tagMax" step="any" value="210" required />
           </div>
         </div>
         <div class="form-group checkbox" style="margin-top: 8px;">

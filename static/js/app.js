@@ -124,8 +124,8 @@ if (formTelemetry) {
     const tag = $("tagName").value.trim();
     const category = $("tagCategory").value.trim().toUpperCase();
     const unit = $("tagUnit").value.trim();
-    const base = parseFloat($("tagBase").value);
-    const variance = parseFloat($("tagVariance").value);
+    const min = parseFloat($("tagMin").value);
+    const max = parseFloat($("tagMax").value);
     const cum = $("tagCum").checked;
 
     if (!tag || !category) return;
@@ -135,8 +135,8 @@ if (formTelemetry) {
       tag,
       category,
       unit,
-      base,
-      variance,
+      min,
+      max,
       cum
     });
 

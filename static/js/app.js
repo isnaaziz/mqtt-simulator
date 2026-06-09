@@ -70,4 +70,101 @@ init3D(
   }
 );
 
+// Modal elements
+const btnAddData = $("btnAddData");
+const modalScrim = $("modalScrim");
+const addDataModal = $("addDataModal");
+const modalClose = $("modalClose");
+
+const tabTelemetry = $("tabTelemetry");
+const tabBreaker = $("tabBreaker");
+const formTelemetry = $("formTelemetry");
+const formBreaker = $("formBreaker");
+
+// Open Modal
+if (btnAddData) {
+  btnAddData.onclick = () => {
+    modalScrim.classList.add("show");
+    addDataModal.classList.add("show");
+  };
+}
+
+// Close Modal helper
+function closeModal() {
+  modalScrim.classList.remove("show");
+  addDataModal.classList.remove("show");
+  formTelemetry.reset();
+  formBreaker.reset();
+}
+
+if (modalClose) modalClose.onclick = closeModal;
+if (modalScrim) modalScrim.onclick = closeModal;
+
+// Switch Tabs
+if (tabTelemetry && tabBreaker) {
+  tabTelemetry.onclick = () => {
+    tabTelemetry.classList.add("active");
+    tabBreaker.classList.remove("active");
+    formTelemetry.classList.add("active");
+    formBreaker.classList.remove("active");
+  };
+
+  tabBreaker.onclick = () => {
+    tabBreaker.classList.add("active");
+    tabTelemetry.classList.remove("active");
+    formBreaker.classList.add("active");
+    formTelemetry.classList.remove("active");
+  };
+}
+
+// Form Telemetry Submit
+if (formTelemetry) {
+  formTelemetry.onsubmit = (e) => {
+    e.preventDefault();
+    const tag = $("tagName").value.trim();
+    const category = $("tagCategory").value.trim().toUpperCase();
+    const unit = $("tagUnit").value.trim();
+    const base = parseFloat($("tagBase").value);
+    const variance = parseFloat($("tagVariance").value);
+    const cum = $("tagCum").checked;
+
+    if (!tag || !category) return;
+
+    send({
+      action: "add_tag",
+      tag,
+      category,
+      unit,
+      base,
+      variance,
+      cum
+    });
+
+    closeModal();
+  };
+}
+
+// Form Breaker Submit
+if (formBreaker) {
+  formBreaker.onsubmit = (e) => {
+    e.preventDefault();
+    const tag = $("cbName").value.trim();
+    const label = $("cbLabel").value.trim();
+    const category = $("cbCategory").value.trim().toUpperCase();
+    const state = $("cbState").value;
+
+    if (!tag || !label || !category) return;
+
+    send({
+      action: "add_breaker",
+      tag,
+      label,
+      category,
+      state
+    });
+
+    closeModal();
+  };
+}
+
 connect(onUpdate, setConn);

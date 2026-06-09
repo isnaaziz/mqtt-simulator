@@ -13,7 +13,9 @@ func (s *Simulator) HandleControl(msg model.ControlMsg) {
 	s.mu.Unlock()
 
 	if s.connected.Load() {
-		if changedCB != "" {
+		if msg.Action == "add_tag" {
+			s.publishTagState(msg.Tag)
+		} else if changedCB != "" {
 			s.publishCBState(changedCB)
 		} else if msg.Action == "set_value" || msg.Action == "set_mode" {
 			s.publishTagState(msg.Tag)
@@ -112,6 +114,54 @@ func (s *Simulator) HandleRC(targetName string, cmd model.RCCommand) {
 }
 
 func (s *Simulator) applyControl(msg model.ControlMsg) (changedCB string) {
+	if msg.Action == "add_tag" {
+		if _, exists := s.tags[msg.Tag]; !exists && msg.Tag != "" {
+			t := model.TagState{
+				Name:     msg.Tag,
+				Category: msg.Category,
+				Unit:     msg.Unit,
+				Base:     msg.Base,
+				Variance: msg.Variance,
+				Cum:      msg.Cum,
+				Mode:     "auto",
+				Value:    msg.Base,
+				Manual:   msg.Base,
+			}
+			if t.Category == "" {
+				t.Category = "LOAD"
+			}
+			s.tags[msg.Tag] = &t
+			s.order = append(s.order, msg.Tag)
+			log.Printf("control: added dynamic tag %s (base=%.3f, var=%.3f, category=%s)\n", msg.Tag, msg.Base, msg.Variance, t.Category)
+		}
+		return ""
+	}
+
+	if msg.Action == "add_breaker" {
+		if _, exists := s.breakers[msg.Tag]; !exists && msg.Tag != "" {
+			b := model.Breaker{
+				Name:     msg.Tag,
+				Category: msg.Category,
+				Label:    msg.Label,
+				State:    msg.State,
+			}
+			if b.Category == "" {
+				b.Category = "CB"
+			}
+			if b.State != "open" && b.State != "closed" {
+				b.State = "closed"
+			}
+			if b.Label == "" {
+				b.Label = b.Name
+			}
+			s.breakers[msg.Tag] = &b
+			s.breakerOrder = append(s.breakerOrder, msg.Tag)
+			log.Printf("control: added dynamic breaker %s (label=%s, state=%s)\n", msg.Tag, b.Label, b.State)
+			return b.Name
+		}
+		return ""
+	}
+
 	if msg.Action == "reset_all" || msg.Action == "auto_all" {
 		for _, t := range s.tags {
 			t.Mode = "auto"

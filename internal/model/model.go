@@ -34,11 +34,17 @@ type TagState struct {
 }
 
 type ControlMsg struct {
-	Action string  `json:"action"`
-	Tag    string  `json:"tag"`
-	Mode   string  `json:"mode"`
-	Value  float64 `json:"value"`
-	State  string  `json:"state"`
+	Action   string  `json:"action"`
+	Tag      string  `json:"tag"`
+	Mode     string  `json:"mode"`
+	Value    float64 `json:"value"`
+	State    string  `json:"state"`
+	Category string  `json:"category,omitempty"`
+	Unit     string  `json:"unit,omitempty"`
+	Base     float64 `json:"base,omitempty"`
+	Variance float64 `json:"variance,omitempty"`
+	Cum      bool    `json:"cum,omitempty"`
+	Label    string  `json:"label,omitempty"`
 }
 
 type RCCommand struct {

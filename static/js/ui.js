@@ -13,7 +13,10 @@ export function initUI(onCardClick, onCBAction) {
 }
 
 export function buildGrid(list) {
-  if (_builtTags) return;
+  const currentCount = Object.keys(_refs).length;
+  if (_builtTags && list.length === currentCount) return;
+  _builtTags = false;
+  for (const k in _refs) delete _refs[k];
   const board = document.getElementById("board");
   board.innerHTML = "";
   const groups = [], idx = {};
@@ -64,7 +67,10 @@ export function buildGrid(list) {
 }
 
 export function buildCB(list) {
-  if (_builtCB) return;
+  const currentCount = Object.keys(_cbRefs).length;
+  if (_builtCB && list.length === currentCount) return;
+  _builtCB = false;
+  for (const k in _cbRefs) delete _cbRefs[k];
   const panel = document.getElementById("cbPanel");
   panel.innerHTML = "";
   for (const b of list) {
